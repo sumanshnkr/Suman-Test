@@ -1,0 +1,39 @@
+name: Terraform GCS Bucket Deployment
+ 
+on:
+  push:
+    branches:
+      - dev
+ 
+jobs:
+  terraform:
+    name: Terraform Plan and Apply
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        working-directory: ./googlecloud
+ 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+ 
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+ 
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+ 
+      - name: Initialize Terraform
+        run: terraform init
+ 
+      - name: Terraform Plan
+        run: terraform plan -var="project_id=${{ secrets.GCP_PROJECT_ID }}" -var="bucket_name=suman test bucket"
+ 
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -var="project_id=${{ secrets.GCP_PROJECT_ID }}" -var="bucket_name=my-dev-bucket"
+      
